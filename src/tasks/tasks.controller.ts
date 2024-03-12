@@ -3,46 +3,47 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { Task, TaskStatus } from './task.model';
 import { CreateTaskDto } from './Dtos/create-task.dto';
 import { GetTasksFilterDto } from './Dtos/get-tasks-filter.dto';
+import { UpdateTaskStatusDto } from './Dtos/update-task-status.dto';
+import { TasksService } from './tasks.service';
+import { Task } from './task.entity';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  getTasks(@Query() filterDto: GetTasksFilterDto): Task[] {
-    return this.tasksService.getTasks(filterDto);
-  }
-
-  @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): Task {
-    return this.tasksService.createTask(createTaskDto);
+  async getTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
+    return await this.tasksService.getTasks(filterDto);
   }
 
   @Get('/:id')
-  getTaskById(@Param('id') id: string): Task {
+  async getTaskById(@Param('id') id: string): Promise<Task> {
     return this.tasksService.getTaskById(id);
   }
 
+  @Post()
+  async createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
+    return await this.tasksService.createTask(createTaskDto);
+  }
+
   @Delete('/:id')
-  deleteTask(@Param('id') id: string): void {
-    return this.tasksService.deleteTask(id);
+  async deleteTask(@Param('id') id: string): Promise<Task> {
+    return await this.tasksService.deleteTask(id);
   }
 
   @Patch('/:id')
-  updateTaskStatus(
+  async updateTaskStatus(
     @Param('id') id: string,
-    @Body('status') status: TaskStatus,
-  ): Task | NotFoundException {
-    return this.tasksService.updateStatus(id, status);
+    @Body() updatetaskStatusDto: UpdateTaskStatusDto,
+  ): Promise<Task> {
+    const { status } = updatetaskStatusDto;
+    return await this.tasksService.updateStatus(id, status);
   }
 }
